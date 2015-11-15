@@ -1,11 +1,7 @@
 var config = require('./config');
-var webpack = require('webpack');
 
 module.exports = {
-  entry: [
-    'webpack/hot/dev-server',
-    config.paths.src + '/index.js'
-  ],
+  entry: config.paths.src + '/index.js',
 
   output: {
     filename: 'bundle.js',
@@ -24,10 +20,6 @@ module.exports = {
       { test: /\.json$/, loader: 'json' }
     ]
   },
-
-  plugins: [
-    new webpack.HotModuleReplacementPlugin()
-  ],
 
   devtool: 'eval'
 };

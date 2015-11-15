@@ -4,3 +4,6 @@ npm-debug.log
 
 # app
 build
+
+# OS files
+.DS_Store

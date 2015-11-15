@@ -30,7 +30,6 @@ gulp.task('webpack-dev-server', function () {
     // Put in dev server config here
     progress: true,
     colors: true,
-    hot: true,
     contentBase: config.paths.build
   })
     .listen(DEV_SERVER, 'localhost', function (err) {
