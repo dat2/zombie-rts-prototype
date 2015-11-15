@@ -1,13 +1,18 @@
 var config = require('./config');
+var webpack = require('webpack');
 
 module.exports = {
-  entry: config.paths.src + '/index.js',
+  entry: [
+    'webpack/hot/dev-server',
+    config.paths.src + '/index.js'
+  ],
 
   output: {
     filename: 'bundle.js',
     path: config.paths.build
   },
 
+  // for PIXI.js
   node: {
     fs: 'empty'
   },
@@ -19,6 +24,10 @@ module.exports = {
       { test: /\.json$/, loader: 'json' }
     ]
   },
+
+  plugins: [
+    new webpack.HotModuleReplacementPlugin()
+  ],
 
   devtool: 'eval'
 };
