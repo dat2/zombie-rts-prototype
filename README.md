@@ -1,2 +1,2 @@
-# gulp-webpack-template
-A simple template for gulp and webpack
+# zombie-rts-prototype
+A prototype zombie-rts game. This is frontend only.
