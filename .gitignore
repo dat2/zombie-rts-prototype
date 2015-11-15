@@ -1,0 +1,6 @@
+# generated
+node_modules
+npm-debug.log
+
+# app
+build
