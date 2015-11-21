@@ -1,7 +1,11 @@
 import PIXI from 'pixi.js';
 import Rx from 'rx';
 
-import { pointsToRect, Vector, intersectsRect, pointInRect, clamp, linerectIntersectionPoint } from './math';
+import { pointsToRect, Vector, intersectsRect, pointInRect, clamp } from './math';
+
+function move(point, stage) {
+  return new Vector(point.x, point.y).add(new Vector(stage.position.x, -stage.position.y));
+}
 
 export function handleSelection(stage, game) {
   const mouseDown = Rx.Observable.fromEvent(stage, 'mousedown')
@@ -17,10 +21,13 @@ export function handleSelection(stage, game) {
   const drag = mouseDown
     .selectMany((md) => mouseMove.startWith(md).takeUntil(mouseUp).merge(mouseUp))
     .map(({ point, start, end }) => {
+      point.x -= stage.position.x;
+      point.y -= stage.position.y;
       if (start) {
         startPoint.copy(point);
       }
       let rect = start ? { x: startPoint.x, y: startPoint.y, width: 0, height: 0 } : pointsToRect(startPoint, point);
+
 
       return { rect, start, end };
     });
@@ -42,10 +49,12 @@ export function handleSelection(stage, game) {
         selectionRect.drawRect(x, y, width, height);
 
         // check if any unit is inside the rect
-        game.units.forEach(unit => {
-          const rect = new PIXI.Rectangle(x, y, width, height);
-          unit.selected = intersectsRect(rect, unit.sprite);
-        });
+        game.agents
+          .filter(a => a.isUnit)
+          .forEach(unit => {
+            const rect = new PIXI.Rectangle(x, y, width, height);
+            unit.selected = intersectsRect(rect, unit.sprite);
+          });
 
         if(end) {
           stage.removeChild(selectionRect);
@@ -54,15 +63,20 @@ export function handleSelection(stage, game) {
     );
 }
 
-export function handleMove(stage, game) {
+export function handleRightclick(stage, game) {
   const rightClick = Rx.Observable.fromEvent(stage, 'rightclick')
     .map(e => ({ point: e.data.global }));
 
   rightClick.subscribe(({ point }) => {
-    game.units
+
+    point.x -= stage.position.x;
+    point.y -= stage.position.y;
+
+    game.agents
       .filter(unit => unit.selected)
       .forEach(unit => {
-        unit.target = point;
+        // seek behaviour :)
+        unit.behaviours[0].target = point;
       });
   });
 }
@@ -121,7 +135,7 @@ export function handleMouseMovement(stage, game, element) {
 
     // first, if we are in the smallest zone, it means we aren't
     // going to move
-    if(pointInRect(pv, zones[zones.length - 1].rect)) {
+    if(!pointInRect(pv, screen) || pointInRect(pv, zones[zones.length - 1].rect)) {
       delta.onNext(Vector.origin());
       return;
     }
@@ -135,11 +149,11 @@ export function handleMouseMovement(stage, game, element) {
     }
     const zone = zones[i];
 
-    const vl = zone.rect.x + verticalZone.left * zone.rect.width,
-          vr = zone.rect.x + verticalZone.right * zone.rect.width;
+    const vl = zone.rect.x + verticalZone.left * zone.rect.width;
+    const vr = zone.rect.x + verticalZone.right * zone.rect.width;
 
-    const ht = zone.rect.y + horizontalZone.top * zone.rect.height,
-          hb = zone.rect.y + horizontalZone.bottom * zone.rect.height;
+    const ht = zone.rect.y + horizontalZone.top * zone.rect.height;
+    const hb = zone.rect.y + horizontalZone.bottom * zone.rect.height;
 
     const isTop = (pv.y <= ht);
     const isBottom = (pv.y >= hb);
@@ -164,11 +178,12 @@ export function handleMouseMovement(stage, game, element) {
 
   // 60fps update the stage position
   Rx.Observable.interval(1000/60)
-    .map(() => delta.getValue())
+    .map(() => delta)
     .subscribe(v => {
+      const val = v.getValue();
       if(game.map) {
-        stage.position.x = clamp(stage.position.x - v.x, -game.map.width + game.window.width, 0);
-        stage.position.y = clamp(stage.position.y - v.y, -game.map.height + game.window.height, 0);
+        stage.position.x = clamp(stage.position.x - val.x, -game.map.width + game.window.width, 0);
+        stage.position.y = clamp(stage.position.y - val.y, -game.map.height + game.window.height, 0);
       }
     });
 }

@@ -2,43 +2,44 @@ import PIXI from 'pixi.js';
 
 import { Vector } from './math';
 import { UNIT_WIDTH } from './constants';
-import { worldToMap } from './map';
 import Agent from './agent';
+import { SeekArrivalBehaviour } from './behaviours';
 
 function degToRads(degs) {
   return PIXI.DEG_TO_RAD * degs;
 }
 
 class Unit extends Agent {
-  constructor({ game, tileWidth, tileHeight, x = 0, y = 0, sx = 1, sy = 1, rotation = 0, resource }) {
-    super();
+  constructor({ game, tileWidth, tileHeight, x = 0, y = 0, sx = 1, sy = 1, rotation = 0, resource, marker }) {
+    super({ behaviours: [ new SeekArrivalBehaviour({ marker }) ] });
 
     // set selected variables
     this._selected = false;
     this.selectionRect = new PIXI.Graphics();
+    this.isUnit = true;
 
     // set the game
     this.game = game;
 
     // set the position, scale, rotation
     this._position = new Vector(
-      (x * tileWidth) / sx + (UNIT_WIDTH * sx) / 2,
-      (y * tileHeight) / sy + (UNIT_WIDTH * sy) / 2
+      (x * tileWidth) / sx + (UNIT_WIDTH * sx),
+      (y * tileHeight) / sy + (UNIT_WIDTH * sy)
     );
     this._scale = new Vector(sx, sy);
     this._rotation = degToRads(rotation);
 
-    // set target variables
-    this._target = this._position;
-    this.positionTile = { };
-    this.targetTile = { };
+    // physics
+    this.velocity = new Vector(0, 0);
+    this.mass = 5;
 
     // trigger all the setters
     this.sprite = new PIXI.Sprite(resource);
+    this.sprite.anchor.x = 0.5;
+    this.sprite.anchor.y = 0.5;
     this.position = this._position;
     this.rotation = this._rotation;
     this.scale = this._scale;
-    this.target = this._target;
 
     // set tile width
     this.tileWidth = tileWidth;
@@ -53,12 +54,8 @@ class Unit extends Agent {
     this._position = new Vector(x, y);
     this.sprite.position.x = x;
     this.sprite.position.y = y;
-
-    // update position tile
-    this.positionTile = worldToMap(this.game, this.position);
-
-    // move the selection tile
-    this.selected = this.selected;
+    this.selectionRect.position.x = x;
+    this.selectionRect.position.y = y;
   }
 
   // rotation will update the sprite
@@ -80,54 +77,38 @@ class Unit extends Agent {
     this.sprite.scale.y = y;
   }
 
-  // target will update targetTile
-  get target() {
-    return this._target;
-  }
-  set target({ x, y }) {
-    this._target = new Vector(x, y);
-    this.targetTile = worldToMap(this.game, this._target);
-  }
-
   get selected() {
     return this._selected;
   }
 
   set selected(selected) {
+    this._selected = selected;
     this.selectionRect.clear();
     if (selected) {
       this.selectionRect.beginFill(0x00FF00, 0.3);
       this.selectionRect.lineStyle(3, 0x00FF00, 0.8);
-      this.selectionRect.drawRect(this.sprite.position.x, this.sprite.position.y, this.sprite.width, this.sprite.height);
+      this.selectionRect.drawRect(-this.sprite.width / 2, -this.sprite.height / 2, this.sprite.width, this.sprite.height);
     }
-    this._selected = selected;
-  }
-
-  update() {
-    const target = this.target;
-    const pos = this.position;
-
-    const dir = target.subtract(pos).norm();
-    const speed = 0.5;
-
-    this.position = pos.add(dir.scale(speed));
   }
 }
 
 
 export function loadUnits(game, stage, resources) {
   const resource = resources.spritesheet.textures['character.png'];
+  const marker = resources.spritesheet.textures['marker.png'];
+
   const { tileWidth, tileHeight } = game.tmx;
 
   // agents
   const units = [
-    new Unit({ game, tileWidth, tileHeight, x: 8, y: 5, resource }),
-    new Unit({ game, tileWidth, tileHeight, x: 4, y: 5, resource })
+    new Unit({ game, tileWidth, tileHeight, x: 8, y: 5, resource, marker }),
+    new Unit({ game, tileWidth, tileHeight, x: 4, y: 5, resource, marker })
   ];
 
   units.forEach(unit => {
     game.agents.push(unit);
 
+    stage.addChild(unit.behaviours[0].marker);
     stage.addChild(unit.sprite);
     stage.addChild(unit.selectionRect);
   });

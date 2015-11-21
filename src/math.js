@@ -12,6 +12,10 @@ export class Vector {
     return new Vector(this.x * s, this.y * s);
   }
 
+  divide(s) {
+    return this.scale(1 / s);
+  }
+
   subtract(v) {
     return this.add(v.scale(-1));
   }
@@ -24,9 +28,22 @@ export class Vector {
     return this.scale(1 / this.magnitude());
   }
 
+  truncate(n) {
+    const mag = this.magnitude();
+    if(mag > n) {
+      return this.norm().scale(n);
+    } else {
+      return this;
+    }
+  }
+
   static origin() {
     return new Vector(0, 0);
   }
+}
+
+export function euclideanDistance(p1, p2) {
+  return Math.sqrt(Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2));
 }
 
 export function pointsToRect(p1, p2) {
@@ -61,42 +78,4 @@ export function intersectsRect(A, B) {
 
 export function pointInRect(p, r) {
   return valueInRange(p.x, r.x, r.x + r.width) && valueInRange(p.y, r.y, r.y + r.height);
-}
-
-export function linerectIntersectionPoint(v, r) {
-  const x = v.x, y = v.y;
-  const minX = r.x, minY = r.y, maxX = r.x + r.width, maxY = r.y + r.height;
-
-  const midX = (minX + maxX) / 2;
-  const midY = (minY + maxY) / 2;
-  // if (midX - x == 0) -> m == ±Inf -> minYx/maxYx == x (because value / ±Inf = ±0)
-  const m = (midY - y) / (midX - x);
-
-  if (x <= midX) { // check "left" side
-    const minXy = m * (minX - x) + y;
-    if (minY < minXy && minXy < maxY) {
-      return { x: minX, y: minXy };
-    }
-  }
-
-  if (x >= midX) { // check "right" side
-    const maxXy = m * (maxX - x) + y;
-    if (minY < maxXy && maxXy < maxY) {
-      return { x: maxX, y: maxXy };
-    }
-  }
-
-  if (y <= midY) { // check "top" side
-    const minYx = (minY - y) / m + x;
-    if (minX < minYx && minYx < maxX) {
-      return { x: minYx, y: minY };
-    }
-  }
-
-  if (y >= midY) { // check "bottom" side
-    const maxYx = (maxY - y) / m + x;
-    if (minX < maxYx && maxYx < maxX) {
-      return { x: maxYx, y: maxY };
-    }
-  }
 }
