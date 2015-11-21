@@ -6,8 +6,19 @@ export function loadMap(game, stage, mapName) {
 
   game.map.position.x = 0;
   game.map.position.y = 0;
-  game.map.scale.x = 1;
-  game.map.scale.y = 1;
+
+  game.tmx = game.map.children[1].map;
 
   stage.addChild(game.map);
+}
+
+export function worldToMap(game, point) {
+  const { x, y } = game.map;
+  let { tileWidth, tileHeight } = game.tmx;
+
+  let target = {
+    x: Math.floor((point.x - x) / tileWidth),
+    y: Math.floor((point.y - y) / tileHeight)
+  };
+  return target;
 }

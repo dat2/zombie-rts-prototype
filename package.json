@@ -10,7 +10,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "pixi-tiledmap": "^1.7.1",
+    "pixi-tiledmap": "^1.7.2",
     "pixi.js": "^3.0.8",
     "run-sequence": "^1.1.4",
     "rx": "^4.0.7"

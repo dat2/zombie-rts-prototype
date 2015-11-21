@@ -1,0 +1,33 @@
+{
+	"meta": {
+		"image": "spritesheet.png",
+		"size": {"w":1376,"h":1232},
+		"scale": "1"
+	},
+	"frames": {
+		"people.png":
+		{
+			"frame": {"x":0,"y":0,"w":1376,"h":1200},
+			"rotated": false,
+			"trimmed": false,
+			"spriteSourceSize": {"x":0,"y":0,"w":1376,"h":1200},
+			"sourceSize": {"w":1376,"h":1200}
+		},
+		"character.png":
+		{
+			"frame": {"x":0,"y":1200,"w":32,"h":32},
+			"rotated": false,
+			"trimmed": false,
+			"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
+			"sourceSize": {"w":32,"h":32}
+		},
+		"zombie.png":
+		{
+			"frame": {"x":32,"y":1200,"w":10,"h":10},
+			"rotated": false,
+			"trimmed": false,
+			"spriteSourceSize": {"x":0,"y":0,"w":10,"h":10},
+			"sourceSize": {"w":10,"h":10}
+		}
+	}
+}

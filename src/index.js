@@ -1,37 +1,38 @@
 import PIXI from 'pixi.js';
+/*eslint-disable no-unused-vars*/
 import pixiTiled from 'pixi-tiledmap';
+/*eslint-enable no-unused-vars*/
 
+import makeStage from './stage';
 import { addAssets } from './assets.js';
 import { loadUnits } from './units.js';
 import { loadMap } from './map.js';
-import { handleSelection, handleMove } from './input.js';
 
 // global game object
 const game = {
-  width: 1280,
-  height: 1280,
-  units: [],
-  map: null
+  agents: [],
+  map: null,
+  tmx: null,
+  window: {
+    width: 800,
+    height: 600
+  }
 };
 
 // append the renderer
-const renderer = new PIXI.autoDetectRenderer(game.width, game.height);
-renderer.view.oncontextmenu = function(e) {
+const renderer = new PIXI.autoDetectRenderer(game.window.width, game.window.height);
+renderer.view.oncontextmenu = function oncontextmenu(e) {
   e.preventDefault();
-}
-document.getElementById("game").appendChild(renderer.view);
+};
+document.getElementById('game').appendChild(renderer.view);
 
-// make a new stage
-const stage = new PIXI.Container();
-stage.interactive = true;
-
-// input
-handleSelection(stage, game);
-handleMove(stage, game);
+const stage = makeStage(game, renderer.view);
 
 // main animate loop
 function animate() {
   requestAnimationFrame(animate);
+
+  game.agents.forEach(agent => agent.update());
 
   renderer.render(stage);
 }
