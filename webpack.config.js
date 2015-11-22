@@ -5,7 +5,7 @@ module.exports = {
 
   output: {
     filename: 'bundle.js',
-    path: config.paths.build
+    path: config.paths.out
   },
 
   // for PIXI.js

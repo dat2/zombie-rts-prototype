@@ -1,9 +1,8 @@
-// NOTE: make sure you have gulp 3.9.0 or above
-
-var gulp = require('gulp');
+var gulp = require('gulp-help')(require('gulp'));
 var $ = require('gulp-load-plugins')();
 var del = require('del');
 var run = require('run-sequence');
+var push = require('git-push');
 
 var webpack = require('webpack');
 var WebpackDevServer = require('webpack-dev-server');
@@ -23,7 +22,7 @@ gulp.task('webpack', function (cb) {
 
 // development server
 var DEV_SERVER = 8080;
-gulp.task('webpack-dev-server', function () {
+gulp.task('webpack:server', function () {
   var compiler = webpack(require('./webpack.config.js'));
 
   new WebpackDevServer(compiler, {
@@ -42,17 +41,25 @@ gulp.task('webpack-dev-server', function () {
 
 gulp.task('copy:static', function () {
   return gulp.src(config.files.static)
-  .pipe($.changed(config.paths.build))
-  .pipe(gulp.dest(config.paths.build))
+    .pipe($.changed(config.paths.build))
+    .pipe(gulp.dest(config.paths.build));
 });
 
-gulp.task('clean:dev', function() {
-  return del([
-    config.files.build
-  ]);
-})
+gulp.task('clean', function() {
+  return del(config.files.build);
+});
 
 gulp.task('dev', function () {
-  run('clean:dev', ['webpack-dev-server', 'copy:static']);
+  run('clean', ['webpack:server', 'copy:static']);
   gulp.watch(config.files.static, ['copy:static']);
+});
+
+gulp.task('build', ['clean'], function(cb) {
+  run(['webpack', 'copy:static']);
+  cb();
+});
+
+gulp.task('deploy', function(cb) {
+  run('build');
+  push(config.paths.build, { name: 'origin', url: 'https://git.heroku.com/zombie-rts-prototype.git', branch: 'master' }, cb);
 });
