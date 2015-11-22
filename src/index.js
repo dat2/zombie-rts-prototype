@@ -16,6 +16,13 @@ const game = {
   window: {
     width: 800,
     height: 600
+  },
+  get collidables() {
+    // in future we will add buildings
+    return this.agents;
+  },
+  set collidables(cs) {
+    // do nothing
   }
 };
 
@@ -32,7 +39,7 @@ const stage = makeStage(game, renderer.view);
 function animate() {
   requestAnimationFrame(animate);
 
-  game.agents.forEach(agent => agent.update());
+  game.agents.forEach(agent => agent.update(game));
 
   renderer.render(stage);
 }

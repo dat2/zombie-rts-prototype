@@ -7,7 +7,9 @@ function move(point, stage) {
   return new Vector(point.x, point.y).add(new Vector(stage.position.x, -stage.position.y));
 }
 
-export function handleSelection(stage, game) {
+export function handleSelection(game) {
+  const stage = game.stage;
+
   const mouseDown = Rx.Observable.fromEvent(stage, 'mousedown')
     .map(e => ({ point: e.data.global, start: true, end: false }));
 
@@ -27,7 +29,6 @@ export function handleSelection(stage, game) {
         startPoint.copy(point);
       }
       let rect = start ? { x: startPoint.x, y: startPoint.y, width: 0, height: 0 } : pointsToRect(startPoint, point);
-
 
       return { rect, start, end };
     });
@@ -63,7 +64,9 @@ export function handleSelection(stage, game) {
     );
 }
 
-export function handleRightclick(stage, game) {
+export function handleRightclick(game) {
+  const stage = game.stage;
+
   const rightClick = Rx.Observable.fromEvent(stage, 'rightclick')
     .map(e => ({ point: e.data.global }));
 
@@ -90,7 +93,9 @@ function makeSpeedzone(r, pct, speed) {
   return { rect, speed };
 }
 
-export function handleMouseMovement(stage, game, element) {
+export function handleMouseMovement(game, element) {
+  const stage = game.stage;
+
   const screen = new PIXI.Rectangle(0, 0, element.width, element.height);
 
   // keep this sorted from largest to smallest

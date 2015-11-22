@@ -1,3 +1,5 @@
+import PIXI from 'pixi.js';
+
 export class Vector {
   constructor(x, y) {
     this.x = x;
@@ -79,3 +81,8 @@ export function intersectsRect(A, B) {
 export function pointInRect(p, r) {
   return valueInRange(p.x, r.x, r.x + r.width) && valueInRange(p.y, r.y, r.y + r.height);
 }
+
+export function degToRads(degs) {
+  return PIXI.DEG_TO_RAD * degs;
+}
+

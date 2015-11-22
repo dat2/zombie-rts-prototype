@@ -22,3 +22,11 @@ export function worldToMap(game, point) {
   };
   return target;
 }
+
+export function mapToWorld(game, { x, y }) {
+  let { tileWidth, tileHeight } = game.tmx;
+  return {
+    x: (x * tileWidth),
+    y: (y * tileHeight)
+  };
+}

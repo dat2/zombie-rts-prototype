@@ -1,6 +1,7 @@
 import PIXI from 'pixi.js';
 import { Vector } from './math';
-// import { worldToMap } from './map';
+
+const EPSILON = 0.001;
 
 export class SeekArrivalBehaviour {
   constructor({ maxSpeed = 1, maxForce = 5, slowingRadius = 1, marker } = {}) {
@@ -28,8 +29,9 @@ export class SeekArrivalBehaviour {
     const distance = desiredVelocity.magnitude();
 
     // if within 1px
-    if(distance < 1) {
+    if(distance < 2) {
       this._seeking = false;
+      agent.velocity = new Vector(0, 0);
       return new Vector(0, 0);
     }
 
@@ -56,4 +58,54 @@ export class SeekArrivalBehaviour {
     this._target = new Vector(x, y);
     this._seeking = true;
   }
+}
+
+export class CollisionAvoidanceBehaviour {
+  constructor({ maxSeeAhead = 32, maxForce = 1, maxVelocity = 5} = {}) {
+    this._maxSeeAhead = maxSeeAhead;
+    this._maxForce = maxForce;
+    this._maxVelocity = maxVelocity;
+  }
+
+  genForce(agent, game) {
+
+    const aheadVector = agent.velocity.norm();
+    const dynamicLength = agent.velocity.magnitude() / this._maxVelocity;
+
+    const ahead1 = agent.position.add(aheadVector.scale(this._maxSeeAhead));
+    const ahead2 = agent.position.add(aheadVector.scale(dynamicLength));
+
+    const closest = game.collidables
+      .filter(c => c !== agent)
+      .reduce((closest, c) => {
+        const centre = new Vector(c.position.x, c.position.y);
+        const dist1 = centre.subtract(ahead1).magnitude();
+        const dist2 = centre.subtract(ahead2).magnitude();
+        const dist3 = centre.subtract(agent.position).magnitude();
+
+        let goingToCollide = dist1 < c.r || dist2 < c.r || dist3 < c.r;
+        let closerThanClosest = closest === null || (dist1 < closest.dist || dist2 < closest.dist || dist3 < closest.dist);
+
+        if(goingToCollide && closerThanClosest) {
+          return { dist: Math.min(dist1, dist2, dist3), c: c };
+        } else {
+          return closest;
+        }
+      }, null);
+
+    if(closest !== null) {
+      const { c } = closest;
+      const force = new Vector(ahead1.x - c.position.x, ahead1.y - c.position.y)
+        .truncate(this._maxForce);
+
+      if(isNaN(force.x)) {
+        debugger;
+      }
+
+      return force;
+    }
+
+    return new Vector(0, 0);
+  }
+
 }
