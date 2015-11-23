@@ -15,7 +15,8 @@
     "node": "5.0.0"
   },
   "dependencies": {
-    "express": "^4.13.3"
+    "express": "^4.13.3",
+    "lodash.difference": "^3.2.2"
   },
   "devDependencies": {
     "babel-core": "^6.1.2",

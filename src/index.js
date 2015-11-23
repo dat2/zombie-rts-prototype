@@ -3,52 +3,98 @@ import PIXI from 'pixi.js';
 import pixiTiled from 'pixi-tiledmap';
 /*eslint-enable no-unused-vars*/
 
-import makeStage from './stage';
-import { addAssets } from './assets.js';
-import { loadUnits } from './units.js';
-import { loadMap } from './map.js';
+// ECS
+// engine
+import Engine from './engine/engine';
+
+// systems
+import RenderSystem from './systems/render';
+import RenderSelectedSystem from './systems/renderSelected';
+import PhysicsSystem from './systems/physics';
+import ScreenMovementSystem from './systems/screenMovement';
+import SelectionInputSystem from './systems/selectionInput';
+
+// TODO input systems
+// TODO behaviour systems
+
+import { loadUnits } from './units';
+
+// components
+import TileMap from './components/tilemap';
+import Transform from './components/transform';
+import ScreenMovement from './components/screenMovement';
 
 // global game object
 const game = {
   agents: [],
-  map: null,
-  tmx: null,
   window: {
     width: 800,
     height: 600
-  },
-  get collidables() {
-    // in future we will add buildings
-    return this.agents;
-  },
-  set collidables(cs) {
-    // do nothing
   }
 };
 
-// append the renderer
+// make the pixijs renderer
 const renderer = new PIXI.autoDetectRenderer(game.window.width, game.window.height);
 renderer.view.oncontextmenu = function oncontextmenu(e) {
   e.preventDefault();
 };
 document.getElementById('game').appendChild(renderer.view);
 
-const stage = makeStage(game, renderer.view);
+// make a new stage
+const stage = new PIXI.Container();
+stage.interactive = true;
 
-// main animate loop
-function animate() {
-  requestAnimationFrame(animate);
+// make a new engine
+const engine = Engine({
+  systems: [
+    PhysicsSystem(),
+    RenderSystem(stage),
+    RenderSelectedSystem(stage),
+    ScreenMovementSystem(stage, renderer.view, game.window),
+    SelectionInputSystem(stage)
+  ]
+});
+
+// the main game loop
+function mainLoop() {
+  requestAnimationFrame(mainLoop);
 
   game.agents.forEach(agent => agent.update(game));
+
+  engine.run();
 
   renderer.render(stage);
 }
 
+
 // load and run
-addAssets();
 PIXI.loader
+  .add([
+    { name: 'spritesheet', url: 'assets/spritesheet.json' },
+    'assets/maps/map1.tmx'
+  ])
   .load((loader, resources) => {
-    loadMap(game, stage, 'assets/maps/map1.tmx');
-    loadUnits(game, stage, resources);
-    animate();
+    const characterTexture = resources.spritesheet.textures['character.png'];
+    const markerTexture = resources.spritesheet.textures['marker.png'];
+
+    // add the map
+    const map = engine.addEntity([
+      Transform(), TileMap({ name: 'assets/maps/map1.tmx' }), ScreenMovement()
+    ]);
+
+    // load the units
+    loadUnits(engine, characterTexture, map);
+
+    // sort by z component
+    stage.children.sort(function(a,b) {
+      if (a.z < b.z) {
+        return -1;
+      }
+      if (a.z > b.z) {
+        return 1;
+      }
+      return 0;
+    });
+
+    mainLoop();
   });

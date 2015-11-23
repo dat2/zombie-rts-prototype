@@ -29,7 +29,7 @@ gulp.task('webpack:server', function () {
     // Put in dev server config here
     progress: true,
     colors: true,
-    contentBase: config.paths.build
+    contentBase: config.paths.out
   })
     .listen(DEV_SERVER, 'localhost', function (err) {
       if(err) {
