@@ -32,37 +32,31 @@ export function makeDragstream(stage) {
 
 
 export default function SelectionInputSystem(stage) {
-  // bleh
-  let entities = [];
+  let selectionRect = new PIXI.Rectangle(0, 0, 0, 0);
 
   /**
    * Handle the mouse drag
    */
   const drag = makeDragstream(stage);
-  const selectionRect = new PIXI.Graphics();
+  const rectGraphics = new PIXI.Graphics();
 
   drag
     .subscribe(
       ({ rect: { x, y, width, height }, start, end }) => {
         if(start) {
-          stage.addChild(selectionRect);
+          stage.addChild(rectGraphics);
         }
 
         // draw the rect
-        selectionRect.clear();
-        selectionRect.beginFill(0x00FF00, 0.3);
-        selectionRect.lineStyle(3, 0x00FF00, 0.8);
-        selectionRect.drawRect(x, y, width, height);
+        rectGraphics.clear();
+        rectGraphics.beginFill(0x00FF00, 0.3);
+        rectGraphics.lineStyle(3, 0x00FF00, 0.8);
+        rectGraphics.drawRect(x, y, width, height);
 
-        // check if any unit is inside the rect
-        entities
-          .forEach(entity => {
-            const rect = new PIXI.Rectangle(x, y, width, height);
-            entity.selected = intersectsRect(rect, entity.renderable);
-          });
+        selectionRect = new PIXI.Rectangle(x, y, width, height);
 
         if(end) {
-          stage.removeChild(selectionRect);
+          stage.removeChild(rectGraphics);
         }
       }
     );
@@ -77,30 +71,29 @@ export default function SelectionInputSystem(stage) {
     point.x -= stage.position.x;
     point.y -= stage.position.y;
 
-    entities
-      .filter(unit => unit.selected)
-      .forEach(entity => {
+    // entities
+      // .filter(unit => unit.selected)
+      // .forEach(entity => {
         // seek behaviour :)
         // entity.behaviours[0].target = point;
-      });
+      // });
   });
 
   /**
    * finally the system doesn't need to do much
    */
   return {
-    components: ['select', 'transform'],
+    components: ['select', 'renderable'],
 
     onAdd(engine, entity) {
-      entities = this.entities;
     },
 
     run(engine, entity) {
-      // ??
+      const [ select, renderC ] = entity.getComponents(...this.components);
+      select.selected = intersectsRect(selectionRect, renderC.renderable);
     },
 
     onRemove(engine, entity) {
-      entities = this.entities;
     }
   };
 }

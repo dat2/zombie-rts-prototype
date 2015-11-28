@@ -36,7 +36,7 @@ export default function Engine({ systems = [] }) {
       });
     },
 
-    getEntitiesWith(components) {
+    query(...components) {
       return this.entities.filter(e => isSubset(components, e.components));
     }
   };
@@ -46,7 +46,7 @@ export default function Engine({ systems = [] }) {
   engine.systems.forEach(s => {
     Object.defineProperty(s, 'entities', {
       get() {
-        return engine.getEntitiesWith(this.components);
+        return engine.query(...this.components);
       },
       set(es) {
         // do nothing

@@ -5,6 +5,7 @@ import { Vector } from '../math';
 export default function({ texture = '', anchor = new Vector(0, 0) } = {}) {
   function Sprite(entity) {
     entity.renderable = new PIXI.Sprite(texture);
+
     entity.renderable.anchor.x = anchor.x;
     entity.renderable.anchor.y = anchor.y;
     entity.renderable.z = 1;

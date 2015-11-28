@@ -112,10 +112,11 @@ export default function ScreenMovementSystem(stage, element, window) {
     },
 
     run(engine, entity) {
+      const [ renderC ] = entity.getComponents('renderable');
       const val = delta.getValue();
 
-      stage.position.x = clamp(stage.position.x - val.x, -entity.renderable.width + window.width, 0);
-      stage.position.y = clamp(stage.position.y - val.y, -entity.renderable.height + window.height, 0);
+      stage.position.x = clamp(stage.position.x - val.x, -renderC.renderable.width + window.width, 0);
+      stage.position.y = clamp(stage.position.y - val.y, -renderC.renderable.height + window.height, 0);
     },
 
     onRemove(engine, entity) {

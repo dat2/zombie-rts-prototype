@@ -6,12 +6,15 @@ export default function PhysicsSystem() {
     },
 
     run(engine, entity) {
+      // get the components?
+      const [ physics, transform ] = entity.getComponents(...this.components);
+
       // add the forces to velocity
-      entity.velocity = entity.forces.reduce((v,f) => v.add(f), entity.velocity);
-      entity.forces = [];
+      physics.velocity = physics.forces.reduce((v,f) => v.add(f), physics.velocity);
+      physics.forces = [];
 
       // update position with velocity
-      entity.position = entity.position.add(entity.velocity);
+      transform.position = transform.position.add(physics.velocity);
     },
 
     onRemove(engine, entity) {

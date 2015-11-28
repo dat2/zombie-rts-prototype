@@ -1,8 +1,9 @@
-export default function({ maxSeekSpeed = 1, maxSeekForce = 5, arrivalRadius = 1 } = {}) {
+export default function({ maxSpeed = 1, maxForce = 5, arrivalRadius = 1 } = {}) {
   function SeekArrival(entity) {
-    entity.maxSeekSpeed = maxSeekSpeed;
-    entity.maxSeekForce = maxSeekForce;
+    entity.maxSpeed = maxSpeed;
+    entity.maxForce = maxForce;
     entity.arrivalRadius = arrivalRadius;
+    entity.seeking = false;
   }
 
   SeekArrival.type = 'seekArrival';

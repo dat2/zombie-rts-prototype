@@ -16,7 +16,6 @@ import SelectionInputSystem from './systems/selectionInput';
 
 // TODO input systems
 // TODO behaviour systems
-
 import { loadUnits } from './units';
 
 // components
@@ -24,17 +23,13 @@ import TileMap from './components/tilemap';
 import Transform from './components/transform';
 import ScreenMovement from './components/screenMovement';
 
-// global game object
-const game = {
-  agents: [],
-  window: {
-    width: 800,
-    height: 600
-  }
+const windowSize = {
+  width: 800,
+  height: 600
 };
 
 // make the pixijs renderer
-const renderer = new PIXI.autoDetectRenderer(game.window.width, game.window.height);
+const renderer = new PIXI.autoDetectRenderer(windowSize.width, windowSize.height);
 renderer.view.oncontextmenu = function oncontextmenu(e) {
   e.preventDefault();
 };
@@ -50,7 +45,7 @@ const engine = Engine({
     PhysicsSystem(),
     RenderSystem(stage),
     RenderSelectedSystem(stage),
-    ScreenMovementSystem(stage, renderer.view, game.window),
+    ScreenMovementSystem(stage, renderer.view, windowSize),
     SelectionInputSystem(stage)
   ]
 });
@@ -58,14 +53,9 @@ const engine = Engine({
 // the main game loop
 function mainLoop() {
   requestAnimationFrame(mainLoop);
-
-  game.agents.forEach(agent => agent.update(game));
-
   engine.run();
-
   renderer.render(stage);
 }
-
 
 // load and run
 PIXI.loader
@@ -83,7 +73,7 @@ PIXI.loader
     ]);
 
     // load the units
-    loadUnits(engine, characterTexture, map);
+    loadUnits(engine, characterTexture, ...map.getComponents('renderable'));
 
     // sort by z component
     stage.children.sort(function(a,b) {

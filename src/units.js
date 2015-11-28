@@ -15,7 +15,9 @@ export function loadUnits(engine, characterTexture, map) {
       Transform({ position: position.add(unitWidth) }),
       Sprite({ texture: characterTexture, anchor: new Vector(0.5, 0.5) }),
       Physics({ mass, velocity: new Vector(0, 0) }),
-      Select({ selected }),
+
+      // Selection component
+      Select(),
 
       // behaviour components with their defaults set
       SeekArrival(), CollisionAvoidance()
@@ -25,6 +27,6 @@ export function loadUnits(engine, characterTexture, map) {
   }
 
   makeUnit(engine, { position: map.mapToWorld({ x: 8, y: 5 }), mass: 5 });
-  makeUnit(engine, { position: map.mapToWorld({ x: 4, y: 5 }), mass: 5, selected: true });
+  makeUnit(engine, { position: map.mapToWorld({ x: 4, y: 5 }), mass: 5 });
 
 }
