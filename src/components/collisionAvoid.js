@@ -1,11 +1,11 @@
 export default function({ maxSeeAhead = 32, maxForce = 1, maxSpeed = 5 } = {}) {
-  function CollisionAvoidance(entity) {
+  function CollisionAvoidBehaviour(entity) {
     entity.maxSeeAhead = maxSeeAhead;
     entity.maxForce = maxForce;
     entity.maxSpeed = maxSpeed;
   }
 
-  CollisionAvoidance.type = 'collisionAvoidance';
+  CollisionAvoidBehaviour.type = 'collisionAvoidBehaviour';
 
-  return CollisionAvoidance;
+  return CollisionAvoidBehaviour;
 }

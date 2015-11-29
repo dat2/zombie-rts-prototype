@@ -15,8 +15,10 @@
     "node": "5.0.0"
   },
   "dependencies": {
+    "color": "^0.10.1",
     "express": "^4.13.3",
-    "lodash.difference": "^3.2.2"
+    "lodash.difference": "^3.2.2",
+    "uuid": "^2.0.1"
   },
   "devDependencies": {
     "babel-core": "^6.1.2",

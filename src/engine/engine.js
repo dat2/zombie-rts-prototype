@@ -1,5 +1,6 @@
 import difference from 'lodash.difference';
 import Entity from '../entities/entity';
+import uuid from 'uuid';
 
 function isSubset(...args) {
   return difference(...args).length === 0;
@@ -11,7 +12,7 @@ export default function Engine({ systems = [] }) {
     systems,
 
     addEntity(...args) {
-      const entity = Entity(...args);
+      const entity = Entity(this, ...args, uuid.v1());
       this.entities.push(entity);
 
       // call the onAdd function for each system
@@ -23,17 +24,30 @@ export default function Engine({ systems = [] }) {
 
       return entity;
     },
+    addComponent(e, c) {
 
-    removeEntity() {
+    },
+
+    removeEntity(e) {
+      // TODO
+    },
+    removeComponent(e, c) {
       // TODO
     },
 
+    lastTime: Date.now(),
+    currentTime: Date.now(),
+
     run() {
+      this.currentTime = Date.now();
+
       this.systems.forEach(s => {
         s.entities.forEach(e => {
-          s.run(this, e);
+          s.run(this, e, (this.currentTime - this.lastTime) / 1000);
         });
       });
+
+      this.lastTime = this.currentTime;
     },
 
     query(...components) {

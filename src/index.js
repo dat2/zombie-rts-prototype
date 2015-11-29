@@ -14,6 +14,9 @@ import PhysicsSystem from './systems/physics';
 import ScreenMovementSystem from './systems/screenMovement';
 import SelectionInputSystem from './systems/selectionInput';
 
+import SeekBehaviourSystem from './systems/seekBehaviour';
+import CollisionAvoidSystem from './systems/collisionAvoid';
+
 // TODO input systems
 // TODO behaviour systems
 import { loadUnits } from './units';
@@ -42,18 +45,28 @@ stage.interactive = true;
 // make a new engine
 const engine = Engine({
   systems: [
-    PhysicsSystem(),
-    RenderSystem(stage),
-    RenderSelectedSystem(stage),
+    // input
     ScreenMovementSystem(stage, renderer.view, windowSize),
-    SelectionInputSystem(stage)
+    SelectionInputSystem(stage),
+
+    // ai behaviours
+    SeekBehaviourSystem(), CollisionAvoidSystem(),
+
+    // physics
+    PhysicsSystem(stage),
+
+    // render
+    RenderSystem(stage),
+    RenderSelectedSystem(stage)
   ]
 });
 
 // the main game loop
 function mainLoop() {
   requestAnimationFrame(mainLoop);
+
   engine.run();
+
   renderer.render(stage);
 }
 

@@ -11,11 +11,12 @@ export default function RenderSelectedSystem(stage) {
     run(engine, entity) {
       const [ select, transform, renderC ] = entity.getComponents(...this.components);
 
-      // copy all the things from the transform
+      // move the rect to the transform
       select.selectionRect.position.copy(transform.position);
       select.selectionRect.scale.copy(transform.scale);
       select.selectionRect.rotation = transform.rotation;
 
+      // draw the selection rect
       select.selectionRect.clear();
       if (select.selected) {
         select.selectionRect.beginFill(0x00FF00, 0.3);

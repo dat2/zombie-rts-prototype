@@ -39,6 +39,10 @@ export class Vector {
     }
   }
 
+  equals(v) {
+    return this.x == v.x && this.y == v.y;
+  }
+
   static origin() {
     return new Vector(0, 0);
   }
@@ -68,6 +72,8 @@ export function clamp(value, min = 0, max = 1) {
 
 export function intersectsRect(A, B) {
   return (
+    A.width > 0 && A.height > 0 && B.width > 0 && B.height > 0 &&
+
     // xOverlap
     (valueInRange(A.x, B.x, B.x + B.width)
       || valueInRange(B.x, A.x, A.x + A.width))

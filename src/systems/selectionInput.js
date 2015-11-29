@@ -1,7 +1,7 @@
 import PIXI from 'pixi.js';
 import Rx from 'rx';
 
-import { pointsToRect, intersectsRect } from '../math';
+import { pointsToRect, intersectsRect, Vector } from '../math';
 
 export function makeDragstream(stage) {
   const mouseDown = Rx.Observable.fromEvent(stage, 'mousedown')
@@ -33,6 +33,7 @@ export function makeDragstream(stage) {
 
 export default function SelectionInputSystem(stage) {
   let selectionRect = new PIXI.Rectangle(0, 0, 0, 0);
+  let target = new PIXI.Point(-1, -1);
 
   /**
    * Handle the mouse drag
@@ -67,17 +68,13 @@ export default function SelectionInputSystem(stage) {
   const rightClick = Rx.Observable.fromEvent(stage, 'rightclick')
     .map(e => ({ point: e.data.global }));
 
-  rightClick.subscribe(({ point }) => {
-    point.x -= stage.position.x;
-    point.y -= stage.position.y;
+  rightClick
+    .subscribe(({ point }) => {
+      point.x -= stage.position.x;
+      point.y -= stage.position.y;
 
-    // entities
-      // .filter(unit => unit.selected)
-      // .forEach(entity => {
-        // seek behaviour :)
-        // entity.behaviours[0].target = point;
-      // });
-  });
+      target.copy(point);
+    });
 
   /**
    * finally the system doesn't need to do much
@@ -89,8 +86,15 @@ export default function SelectionInputSystem(stage) {
     },
 
     run(engine, entity) {
-      const [ select, renderC ] = entity.getComponents(...this.components);
+      const [ select, renderC, seekBehaviour ] = entity.getComponents(...this.components, 'seekBehaviour');
       select.selected = intersectsRect(selectionRect, renderC.renderable);
+
+      if(select.selected) {
+        if(!target.equals({ x: -1, y: -1 }) && !target.equals(seekBehaviour.target)) {
+          seekBehaviour.target = new Vector(target.x, target.y);
+          seekBehaviour.seeking = true;
+        }
+      }
     },
 
     onRemove(engine, entity) {
