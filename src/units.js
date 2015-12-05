@@ -17,7 +17,7 @@ export function loadUnits(engine, characterTexture, map) {
       Sprite({ texture: characterTexture, anchor: new Vector(0.5, 0.5) }),
 
       Physics({ mass, velocity: new Vector(0, 0) }),
-      CollideShape({ type: 'circle', r: Math.max(characterTexture.width, characterTexture.height) }),
+      CollideShape({ type: 'circle', r: Math.max(characterTexture.width, characterTexture.height) / 2 }),
 
       // Selection component
       Select(),
@@ -30,6 +30,6 @@ export function loadUnits(engine, characterTexture, map) {
   }
 
   makeUnit(engine, { position: map.mapToWorld({ x: 8, y: 5 }), mass: 5 });
-  makeUnit(engine, { position: map.mapToWorld({ x: 4, y: 5 }), mass: 5 });
+  makeUnit(engine, { position: map.mapToWorld({ x: 6, y: 5 }), mass: 5 });
 
 }

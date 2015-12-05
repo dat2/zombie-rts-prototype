@@ -8,14 +8,22 @@ import pixiTiled from 'pixi-tiledmap';
 import Engine from './engine/engine';
 
 // systems
-import RenderSystem from './systems/render';
-import RenderSelectedSystem from './systems/renderSelected';
-import PhysicsSystem from './systems/physics';
+
+// input
 import ScreenMovementSystem from './systems/screenMovement';
 import SelectionInputSystem from './systems/selectionInput';
 
+//ai
 import SeekBehaviourSystem from './systems/seekBehaviour';
 import CollisionAvoidSystem from './systems/collisionAvoid';
+
+// physics
+import CollisionSystem from './systems/collision';
+import PhysicsSystem from './systems/physics';
+
+// render
+import RenderSystem from './systems/render';
+import RenderSelectedSystem from './systems/renderSelected';
 
 // TODO input systems
 // TODO behaviour systems
@@ -51,6 +59,8 @@ const engine = Engine({
 
     // ai behaviours
     SeekBehaviourSystem(), CollisionAvoidSystem(),
+
+    CollisionSystem(stage),
 
     // physics
     PhysicsSystem(stage),

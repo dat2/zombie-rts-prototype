@@ -1,10 +1,10 @@
 import PIXI from 'pixi.js';
 
 export default function({ selected = false } = {}) {
-  function Select(entity) {
-    entity.selected = selected;
-    entity.selectionRect = new PIXI.Graphics();
-    entity.selectionRect.z = 2;
+  function Select(component) {
+    component.selected = selected;
+    component.selectionRect = new PIXI.Graphics();
+    component.selectionRect.z = 2;
   }
 
   Select.type = 'select';
