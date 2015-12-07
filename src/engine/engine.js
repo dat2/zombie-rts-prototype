@@ -42,6 +42,10 @@ export default function Engine({ systems = [] }) {
       this.currentTime = Date.now();
 
       this.systems.forEach(s => {
+        if(s.beforeRun) {
+          s.beforeRun(s.entities);
+        }
+
         s.entities.forEach(e => {
           s.run(this, e, (this.currentTime - this.lastTime) / 1000);
         });

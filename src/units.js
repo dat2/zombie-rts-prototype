@@ -1,6 +1,6 @@
 import { Vector } from './math';
 
-import CollideShape from './components/collideShape';
+import AxisAlignedBoundingBox from './components/aabb';
 import Transform from './components/transform';
 import Sprite from './components/sprite';
 import Physics from './components/physics';
@@ -17,7 +17,7 @@ export function loadUnits(engine, characterTexture, map) {
       Sprite({ texture: characterTexture, anchor: new Vector(0.5, 0.5) }),
 
       Physics({ mass, velocity: new Vector(0, 0) }),
-      CollideShape({ type: 'circle', r: Math.max(characterTexture.width, characterTexture.height) / 2 }),
+      AxisAlignedBoundingBox({ x: position.x, y: position.y, width: characterTexture.width, height: characterTexture.height }),
 
       // Selection component
       Select(),

@@ -11,16 +11,19 @@ export default function SeekBehaviourSystem() {
       // get the components?
       const [ physics, seekBehaviour, transform ] = entity.getComponents(...this.components);
 
-      // add the forces to physics
-      let force = new Vector(0, 0);
+      // add the impulses to physics
+      let impulse = new Vector(0, 0);
 
       if(seekBehaviour.seeking) {
         let desiredVelocity = seekBehaviour.target.subtract(transform.position);
         const distance = desiredVelocity.magnitude();
 
-        // if within 1px
-        if(distance <= 1) {
+        // if within 3px
+        if(distance <= 3) {
           seekBehaviour.seeking = false;
+
+          // JUST make it stop
+          impulse = physics.velocity.scale(-1);
         } else {
 
           if(distance < seekBehaviour.arrivalRadius) {
@@ -29,13 +32,13 @@ export default function SeekBehaviourSystem() {
             desiredVelocity = desiredVelocity.norm().scale(seekBehaviour.maxSpeed);
           }
 
-          force = desiredVelocity.subtract(physics.velocity)
-            .scale(physics.mass)
+          impulse = desiredVelocity.subtract(physics.velocity)
+            .divide(physics.mass)
             .truncate(seekBehaviour.maxForce);
         }
       }
 
-      physics.addForce(force);
+      physics.addImpulse(impulse);
     },
 
     onRemove(engine, entity) {

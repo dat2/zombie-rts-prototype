@@ -35,8 +35,8 @@ export default function PhysicsSystem(stage) {
       // for each force
       physics.forceGraphics.clear();
 
-      const cols = colors(physics.forces.length + 1);
-      physics.forces.forEach((f, i) => {
+      const cols = colors(physics.impulses.length + 1);
+      physics.impulses.forEach((f, i) => {
         drawVector(physics.forceGraphics, cols[i], f);
       });
       drawVector(physics.forceGraphics, cols[cols.length - 1], physics.velocity);
@@ -45,8 +45,12 @@ export default function PhysicsSystem(stage) {
 
       // add the forces to velocity
       // for each force, F = ma, a = F / m, v += a
-      physics.velocity = physics.forces.reduce((v,f) => v.add(f.divide(physics.mass).scale(delta)), physics.velocity);
-      physics.forces = [];
+      physics.velocity =
+        // physics.forces.reduce((v,f) => v.add(f.divide(physics.mass).scale(delta)), physics.velocity)
+        physics.impulses.reduce((v, j) => v.add(j), physics.velocity);
+      physics.impulses = [];
+
+      console.log(physics.velocity);
 
       // update position with velocity
       transform.position = transform.position.add(physics.velocity.scale(delta));

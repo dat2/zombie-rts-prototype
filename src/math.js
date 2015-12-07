@@ -22,6 +22,10 @@ export class Vector {
     return this.add(v.scale(-1));
   }
 
+  dot({ x, y }) {
+    return this.x * x + this.y * y;
+  }
+
   magnitude() {
     return Math.sqrt(Math.pow(this.x, 2) + Math.pow(this.y, 2));
   }

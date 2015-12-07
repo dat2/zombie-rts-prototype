@@ -1,61 +1,85 @@
 import PIXI from 'pixi.js';
+import QuadTree from '../quadtree';
+import { Vector } from '../math';
 
-function circlesOverlapping(c, c2) {
-  return c.position.subtract(c2.position).magnitude() < c.r + c2.r;
-}
+export default function CollisionSystem(stage, debug = true) {
+  const quadTree = new QuadTree({ bounds: stage });
 
-function makeCircle(delta, { velocity }, { r }, { position }) {
+  function makeRect(aabb) {
+    return new PIXI.Rectangle(aabb.x, aabb.y, aabb.width, aabb.height);
+  }
+
   return {
-    r,
-    position: position.add(velocity.scale(delta))
-  };
-}
-
-export default function CollisionSystem(stage) {
-  return {
-    components: ['physics', 'collideShape', 'transform'],
+    components: ['physics', 'aabb'],
 
     onAdd(engine, entity) {
-      const [ collideShape ] = entity.getComponents('collideShape');
+      if(debug) {
+        const [ aabb ] = entity.getComponents('aabb');
 
-      collideShape.shapeGraphics = new PIXI.Graphics();
+        aabb.shapeGraphics = new PIXI.Graphics();
+        const col = 0xFF0000;
+        aabb.shapeGraphics.beginFill(col, 0.3);
+        aabb.shapeGraphics.lineStyle(3, col, 0.8);
+        aabb.shapeGraphics.drawRect(-aabb.width / 2, -aabb.height / 2, aabb.width, aabb.height);
 
-      const col = 0xFF0000;
-      collideShape.shapeGraphics.beginFill(col, 0.3);
-      collideShape.shapeGraphics.lineStyle(3, col, 0.8);
-      collideShape.shapeGraphics.drawCircle(0, 0, collideShape.r);
+        stage.addChild(aabb.shapeGraphics);
+      }
+    },
 
-      stage.addChild(collideShape.shapeGraphics);
+    beforeRun(entities) {
+      quadTree.clear();
+
+      entities.forEach(entity => {
+        const [ rect ] = entity.getComponents('aabb');
+        quadTree.insert({ rect, entity });
+      });
     },
 
     run(engine, entity, delta) {
-      const [ p1, cs1, t1 ] = entity.getComponents(...this.components);
+      const [ p1, aabb1, t1 ] = entity.getComponents(...this.components, 'transform');
 
-      // render the collide shape
-      cs1.shapeGraphics.position.copy(t1.position);
-      cs1.shapeGraphics.scale.copy(t1.scale);
-      cs1.shapeGraphics.rotation = t1.rotation;
+      aabb1.x = t1.position.x;
+      aabb1.y = t1.position.y;
+
+      if(debug) {
+        // render the collide shape
+        aabb1.shapeGraphics.position.copy(aabb1);
+        aabb1.shapeGraphics.scale.copy(t1.scale);
+        aabb1.shapeGraphics.rotation = t1.rotation;
+      }
+
 
       // make the circle
-      const c1 = makeCircle(delta, p1, cs1, t1);
-
-      // TODO broadphase
-      const entities = this.entities
-        .filter(e => e.id !== entity.id);
+      const entities = quadTree.retrieve(aabb1);
+      const id = entity.id;
 
       // apply forces to both
       entities
-        .forEach(e => {
-          const [ p2, cs2, t2 ] = e.getComponents(...this.components);
-          const c2 = makeCircle(delta, p2, cs2, t2);
+        .filter(({ entity }) => entity.id != id)
+        .forEach(({ entity }) => {
+          const [ p2, aabb2 ] = entity.getComponents(...this.components);
 
-          // simple impl of newton's second law
-          if(circlesOverlapping(c1, c2)) {
-            // p1.forces = [];
-            // p1.addForce(p2.velocity.scale(p2.mass));
+          if(aabb1.intersects(aabb2)) {
+            const n = aabb1.collisionNormal(aabb2);
 
-            // p2.forces = [];
-            // p2.addForce(p1.velocity.scale(p1.mass));
+            // calculate force
+            const rv = p2.velocity.subtract(p1.velocity);
+            const velAlongNormal = rv.dot(n);
+
+            if(velAlongNormal > 0) {
+              return;
+            }
+
+            // restitution factor
+            const e = 1;
+
+            // actual magnitude of the impulse
+            let j = -(1 + e) * velAlongNormal;
+            j /= (1 / p1.mass) + (1 / p2.mass);
+            const impulse = n.scale(j);
+
+            p1.addImpulse(impulse.scale(-1).divide(p1.mass));
+            p2.addImpulse(impulse.divide(p2.mass));
           }
         });
 
@@ -63,9 +87,11 @@ export default function CollisionSystem(stage) {
     },
 
     onRemove(engine, entity) {
-      const [ collideShape ] = entity.getComponents('collideShape');
+      if(debug) {
+        const [ aabb ] = entity.getComponents('aabb');
 
-      stage.removeChild(collideShape.shapeGraphics);
+        stage.removeChild(aabb.shapeGraphics);
+      }
     }
   };
 }

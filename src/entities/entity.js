@@ -11,10 +11,11 @@ export default function Entity(engine, components = [], id) {
     engine,
 
     addComponent(c) {
-
     },
     removeComponent(c) {
-
+    },
+    hasComponent(c) {
+      return this.components.includes(c);
     },
 
     id

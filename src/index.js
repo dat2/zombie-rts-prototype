@@ -60,6 +60,7 @@ const engine = Engine({
     // ai behaviours
     SeekBehaviourSystem(), CollisionAvoidSystem(),
 
+    // yay
     CollisionSystem(stage),
 
     // physics
