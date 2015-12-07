@@ -34,6 +34,14 @@ export default function({ width = 32, height = 32, x = 0, y = 0 } = {}) {
     component.show = function() {
       return `AABB (x=${this.x}, y=${this.y}, width=${this.width}, height=${this.height})`;
     };
+
+    component.move = function({ x, y }) {
+      const newC = Object.assign({}, this);
+      newC.x += x;
+      newC.y += y;
+
+      return newC;
+    };
   }
 
   AxisAlignedBoundingBox.type = 'aabb';

@@ -1,61 +1,66 @@
+import PIXI from 'pixi.js';
+
 import { Vector } from '../math';
 
-export default function CollisionAvoidance(collideSystem) {
+export default function CollisionAvoidance(collideSystem, stage, debug = true) {
   return {
-    components: ['physics', 'collisionAvoidBehaviour', 'transform'],
+    components: ['physics', 'collisionAvoidBehaviour', 'aabb', 'transform'],
 
     onAdd(engine, entity) {
-      // add a new marker entity, based on the entity's target :)
     },
 
     run(engine, entity) {
-      const [ physics, collisionAvoidBehaviour, transform ] = entity.getComponents(...this.components);
+      const [ physics, collisionAvoidBehaviour, aabb, transform ] = entity.getComponents(...this.components);
 
-      let force = new Vector(0, 0);
+      let impulse = new Vector(0, 0);
 
+
+      // const dynamicLength = physics.velocity.magnitude() / collisionAvoidBehaviour.maxSpeed;
       const aheadVector = physics.velocity.norm();
-      const dynamicLength = physics.velocity.magnitude() / collisionAvoidBehaviour.maxVelocity;
 
-      const ahead1 = transform.position.add(aheadVector.scale(collisionAvoidBehaviour.maxSeeAhead));
-      const ahead2 = transform.position.add(aheadVector.scale(dynamicLength));
+      const ahead1 = aheadVector.scale(collisionAvoidBehaviour.maxSeeAhead);
+      const ahead1p = transform.position.add(ahead1);
 
-      // we need to get collide system up and running :)
-      /*
-      const closest = game.collidables
-        .filter(c => c !== agent)
-        .reduce((closest, c) => {
-          const centre = new Vector(c.position.x, c.position.y);
-          const dist1 = centre.subtract(ahead1).magnitude();
-          const dist2 = centre.subtract(ahead2).magnitude();
-          const dist3 = centre.subtract(transform.position).magnitude();
+      const movedAABB = aabb.move(ahead1);
 
-          let goingToCollide = dist1 < c.r || dist2 < c.r || dist3 < c.r;
-          let closerThanClosest = closest === null || (dist1 < closest.dist || dist2 < closest.dist || dist3 < closest.dist);
+      const entities = collideSystem.quadTree.retrieve(movedAABB);
+      const id = entity.id;
 
-          if(goingToCollide && closerThanClosest) {
-            return { dist: Math.min(dist1, dist2, dist3), c: c };
+      // apply forces to both
+      const closest = entities
+        .map(({ entity }) => entity)
+        // ignore entits that are near us
+        .filter(entity => entity.id != id)
+
+        // only return the aabb's that we will crash into
+        .filter(entity => {
+          const [ aabb2 ] = entity.getComponents('aabb');
+          return movedAABB.intersects(aabb2);
+        })
+
+        // return the one that is closest to us now :)
+        .reduce((closest, entity) => {
+          const [ t2 ] = entity.getComponents('transform');
+          const t2d = t2.position.subtract(transform.position).magnitude();
+
+          const { dist } = closest;
+          if(t2d < dist) {
+            return { dist: t2d, transform: t2 };
           } else {
             return closest;
           }
-        }, null);
+        }, { dist: Infinity, transform: null });
 
-      if(closest !== null) {
-        const { c } = closest;
-        const force = new Vector(ahead1.x - c.position.x, ahead1.y - c.position.y)
+      if(closest.transform !== null) {
+        console.log(closest.transform);
+        impulse = ahead1p.subtract(closest.transform.position)
           .truncate(collisionAvoidBehaviour.maxForce);
+      }
 
-        if(isNaN(force.x)) {
-          debugger;
-        }
-
-        return force;
-      }*/
-
-      physics.addForce(force);
+      physics.addImpulse(impulse);
     },
 
     onRemove(engine, entity) {
-
     }
   };
 }

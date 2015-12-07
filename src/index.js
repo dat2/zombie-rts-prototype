@@ -50,6 +50,9 @@ document.getElementById('game').appendChild(renderer.view);
 const stage = new PIXI.Container();
 stage.interactive = true;
 
+// yay
+const cs = CollisionSystem(stage);
+
 // make a new engine
 const engine = Engine({
   systems: [
@@ -58,10 +61,10 @@ const engine = Engine({
     SelectionInputSystem(stage),
 
     // ai behaviours
-    SeekBehaviourSystem(), CollisionAvoidSystem(),
+    SeekBehaviourSystem(), CollisionAvoidSystem(cs, stage),
 
-    // yay
-    CollisionSystem(stage),
+    // collision
+    cs,
 
     // physics
     PhysicsSystem(stage),

@@ -20,7 +20,7 @@ export default function ScreenMovementSystem(stage, element, window) {
   const screen = new PIXI.Rectangle(0, 0, element.width, element.height);
 
   // keep this sorted from largest to smallest
-  const zones = [ makeSpeedzone(screen, 0.95, 12), makeSpeedzone(screen, 0.9, 8), makeSpeedzone(screen, 0.8, 6) ];
+  const zones = [ makeSpeedzone(screen, 0.99, 12), makeSpeedzone(screen, 0.98, 8), makeSpeedzone(screen, 0.97, 6) ];
 
   // the movement zones direction vectors
   // t: top

@@ -15,7 +15,7 @@ export class Vector {
   }
 
   divide(s) {
-    return this.scale(1 / s);
+    return this.scale(s > 0 ? (1 / s) : 0);
   }
 
   subtract(v) {
@@ -31,7 +31,7 @@ export class Vector {
   }
 
   norm() {
-    return this.scale(1 / this.magnitude());
+    return this.divide(this.magnitude());
   }
 
   truncate(n) {

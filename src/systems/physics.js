@@ -12,15 +12,17 @@ function drawVector(graphics, color, v, scale = 2) {
   graphics.lineTo(scaled.x, scaled.y);
 }
 
-export default function PhysicsSystem(stage) {
+export default function PhysicsSystem(stage, debug = true) {
   return {
     components: ['physics', 'transform'],
 
     onAdd(engine, entity) {
-      const [ physics ] = entity.getComponents('physics');
+      if(debug) {
+        const [ physics ] = entity.getComponents('physics');
 
-      physics.forceGraphics = new PIXI.Graphics();
-      stage.addChild(physics.forceGraphics);
+        physics.forceGraphics = new PIXI.Graphics();
+        stage.addChild(physics.forceGraphics);
+      }
     },
 
     // delta === s
@@ -28,29 +30,24 @@ export default function PhysicsSystem(stage) {
       const [ physics, transform ] = entity.getComponents(...this.components);
 
       // render forces
-      physics.forceGraphics.position.copy(transform.position);
-      physics.forceGraphics.scale.copy(transform.scale);
-      physics.forceGraphics.rotation = transform.rotation;
+      if(debug) {
+        physics.forceGraphics.position.copy(transform.position);
+        physics.forceGraphics.scale.copy(transform.scale);
+        physics.forceGraphics.rotation = transform.rotation;
 
-      // for each force
-      physics.forceGraphics.clear();
+        // for each force
+        physics.forceGraphics.clear();
 
-      const cols = colors(physics.impulses.length + 1);
-      physics.impulses.forEach((f, i) => {
-        drawVector(physics.forceGraphics, cols[i], f);
-      });
-      drawVector(physics.forceGraphics, cols[cols.length - 1], physics.velocity);
+        const cols = colors(physics.impulses.length + 1);
+        physics.impulses.forEach((f, i) => {
+          drawVector(physics.forceGraphics, cols[i], f);
+        });
+        drawVector(physics.forceGraphics, cols[cols.length - 1], physics.velocity);
+      }
 
-      // do force calculation
-
-      // add the forces to velocity
-      // for each force, F = ma, a = F / m, v += a
-      physics.velocity =
-        // physics.forces.reduce((v,f) => v.add(f.divide(physics.mass).scale(delta)), physics.velocity)
-        physics.impulses.reduce((v, j) => v.add(j), physics.velocity);
+      // impulses :)
+      physics.velocity = physics.impulses.reduce((v, j) => v.add(j), physics.velocity);
       physics.impulses = [];
-
-      console.log(physics.velocity);
 
       // update position with velocity
       transform.position = transform.position.add(physics.velocity.scale(delta));

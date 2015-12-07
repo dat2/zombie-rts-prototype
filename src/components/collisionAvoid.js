@@ -1,4 +1,4 @@
-export default function({ maxSeeAhead = 32, maxForce = 1, maxSpeed = 5 } = {}) {
+export default function({ maxSeeAhead = 32, maxForce = 40, maxSpeed = 5 } = {}) {
   function CollisionAvoidBehaviour(component) {
     component.maxSeeAhead = maxSeeAhead;
     component.maxForce = maxForce;

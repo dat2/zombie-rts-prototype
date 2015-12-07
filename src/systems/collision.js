@@ -12,6 +12,8 @@ export default function CollisionSystem(stage, debug = true) {
   return {
     components: ['physics', 'aabb'],
 
+    quadTree,
+
     onAdd(engine, entity) {
       if(debug) {
         const [ aabb ] = entity.getComponents('aabb');
@@ -48,8 +50,7 @@ export default function CollisionSystem(stage, debug = true) {
         aabb1.shapeGraphics.rotation = t1.rotation;
       }
 
-
-      // make the circle
+      // get all the entities near aabb1
       const entities = quadTree.retrieve(aabb1);
       const id = entity.id;
 
@@ -71,14 +72,14 @@ export default function CollisionSystem(stage, debug = true) {
             }
 
             // restitution factor
-            const e = 1;
+            const e = Math.min(p1.restitution, p2.restitution);
 
             // actual magnitude of the impulse
             let j = -(1 + e) * velAlongNormal;
-            j /= (1 / p1.mass) + (1 / p2.mass);
+            j /= (p1.inverseMass) + (p2.inverseMass);
             const impulse = n.scale(j);
 
-            p1.addImpulse(impulse.scale(-1).divide(p1.mass));
+            p1.addImpulse(impulse.scale(-1).scale(p1.inverseMass));
             p2.addImpulse(impulse.divide(p2.mass));
           }
         });
